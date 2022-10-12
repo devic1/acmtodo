@@ -3,11 +3,20 @@ import { MdDelete } from "react-icons/md";
 
 function Todo() {
   const [data, setdata] = useState(() => {
+    if (!localStorage.getItem("id")) {
+      localStorage.setItem("id", 1);
+    }
+
     if (localStorage.getItem("todos")) {
       return JSON.parse(localStorage.getItem("todos"));
     } else {
       return [];
     }
+  });
+  const [edit, setedit] = useState({
+    edittext: "",
+    editid: 0,
+    editstatuts: false,
   });
   const [completed, setcompleted] = useState(() => {
     if (localStorage.getItem("completed")) {
@@ -30,8 +39,16 @@ function Todo() {
 
   function Entered(event) {
     event.preventDefault();
-    setdata([...data, [data.length + 1, inp]]);
+    setdata([
+      ...data,
+      [parseInt(JSON.parse(localStorage.getItem("id"))) + 1, inp],
+    ]);
+    localStorage.setItem("id", parseInt(localStorage.getItem("id")) + 1);
     setinp("");
+    if (edit.editstatuts == true) {
+      Deletetodo([edit.editid, edit.edittext]);
+      setedit({ editid: 0, edittext: "", editstatuts: false });
+    }
   }
 
   function Deletetodo(props) {
@@ -52,11 +69,16 @@ function Todo() {
     }
     setcompleted(yar);
   }
+  function Editit(props) {
+    console.log(props);
+    setedit({ edittext: props[1], editid: props[0], editstatuts: true });
+    setinp(props[1]);
+  }
   function Comp(props) {
     setcompleted([...completed, [props[0], props[1]]]);
     Deletetodo(props);
   }
-
+  console.log(localStorage.getItem("id"));
   return (
     <div>
       <div className="topbar">Todo ☑</div>
@@ -97,6 +119,10 @@ function Todo() {
                     type={"checkbox"}
                     onChange={() => Comp(ele)}
                   ></input>
+                  <button type={"button"} onClick={() => Editit(ele)}>
+                    Edit
+                  </button>
+
                   <button type={"button"} onClick={() => Deletetodo(ele)}>
                     <MdDelete />
                   </button>
